@@ -1,0 +1,118 @@
+job('job_dsl_first_job') {
+	
+	description('This is a DSL job')
+
+	parameters {
+
+	stringParam('MSG', defaultValue = 'Hello World', description = 'Enter MSG')
+	choiceParam('City', ['Chennai (default)', 'Mumbai', 'Delhi'], description = 'Select City')
+
+	}
+
+	/*scm{
+
+	github('mchand10/mvn.git','master')
+    credentials('git_user')
+
+	}
+*/
+triggers{
+
+     scm('5 * * *')
+
+	}
+  
+  steps
+  {
+    shell("""
+          echo 'Hello World'
+          whoami
+          """)
+  }
+  
+  publishers
+  {
+    
+    mailer('mithunsneakpeek@gmail.com', true, true)
+  }
+  
+}
+
+
+job('ansbile_seed'){
+  
+  description('This is Ansible Project built by DSL')
+
+    parameters{
+ 
+    stringParam('ANSIBLE_MSG', defaultValue='HELLO_WORLD', description='Ansible variables')
+
+    }
+
+steps{
+
+ansiblePlaybook('/var/jenkins_home/ansible/play.yml') 
+  {
+        inventoryPath('/var/jenkins_home/ansible/hosts')
+        //ansibleName('Ansible_DSL')
+        //forks(5)
+        //unbufferedOutput(unbufferedOutput = true)
+        //colorizedOutput(colorizedOutput = false)
+        //hostKeyChecking(hostKeyChecking = false)
+        extraVars {
+          extraVar('MSG', '${ANSIBLE_MSG}', false)
+        }
+   }
+
+   }
+
+}
+
+
+
+job('maven_seed'){
+  
+  description('This Maven Project by DSL')
+
+  scm {
+        git {
+            remote {
+                github('mchand10/mvn','https')
+                credentials('git_user')
+            }
+        }
+    }
+
+
+steps{
+        maven {
+            
+            mavenInstallation('maven-test')
+            goals('-B -DskipTests clean package')
+
+            }
+
+maven {
+            mavenInstallation('maven-test')
+            goals('test')
+
+            }
+
+shell ('''
+echo 'Execute shell'
+java -jar /var/jenkins_home/workspace/maven_seed/target/my-app-1.0-SNAPSHOT.jar
+
+''')
+
+}
+
+publishers {
+        archiveJunit('target/surefire-reports/*.xml')
+
+        archiveArtifacts('target/*.jar')
+ 
+        //mailer('me@example.com', true, true)
+
+    }
+
+}
