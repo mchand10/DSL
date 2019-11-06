@@ -1,0 +1,66 @@
+
+pipeline{
+	agent any
+	
+	environment {
+	    
+	    NAME='Hello'
+	    LASTNAME='WORLD'
+	    secret=credentials('Pipeline_Text')
+	    
+	}
+
+	stages {
+     stage('Build'){
+         
+         steps{
+     
+        retry(3){
+            sh 'echo ${NAME}${LASTNAME} ${secret}'
+        }
+        
+        // timeout (time:3, unit: 'SECONDS'){
+        //     sh 'sleep 5'
+        // }
+     echo 'Build'
+     }
+     }
+
+     stage('Test'){
+         
+         steps{
+     echo 'Testing..'
+}
+     }
+
+     stage ('Deploy'){
+         
+         steps{
+     echo 'Testing'
+}
+     }
+
+
+     }
+     
+     post{
+         
+         always{
+             echo 'I will always get this message'
+         }
+         
+         success{
+             echo 'I will get this message on success'
+         }
+         
+         failure{
+             echo 'I will get his message on failure'
+         }
+         
+         unstable{
+             echo 'I will get this message on unstable builds'
+         }
+         
+     }
+
+}
